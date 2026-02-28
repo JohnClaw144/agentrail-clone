@@ -1,26 +1,175 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fafafa;
+  --foreground: #0a0a0a;
+  --accent: #FE6700;
+  --accent-glow: rgba(254, 103, 0, 0.08);
+  --border: #e2e2e2;
+  --muted: #8a8a8a;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --success: #0a0a0a;
+  --failed: #c4342d;
+  --gradient-subtle: linear-gradient(135deg, rgba(254,103,0,0.03) 0%, transparent 50%);
+}
+
+[data-theme="dark"] {
+  --background: #09090b;
+  --foreground: #fafafa;
+  --accent: #FE6700;
+  --accent-glow: rgba(254, 103, 0, 0.06);
+  --border: #1e1e22;
+  --muted: #6a6a6a;
+  --surface: #111114;
+  --surface-raised: #18181b;
+  --success: #fafafa;
+  --failed: #ef4444;
+  --gradient-subtle: linear-gradient(135deg, rgba(254,103,0,0.04) 0%, transparent 50%);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --color-accent: var(--accent);
+  --color-accent-glow: var(--accent-glow);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-success: var(--success);
+  --color-failed: var(--failed);
+  --font-sans: var(--font-outfit), system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-outfit), system-ui, sans-serif;
+}
+
+/* ── Marquee ── */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+/* ── Entrance animations ── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out both;
+}
+.animate-slide-right {
+  animation: slide-in-right 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.animate-pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+/* Stagger delays */
+.delay-1 { animation-delay: 0.08s; }
+.delay-2 { animation-delay: 0.16s; }
+.delay-3 { animation-delay: 0.24s; }
+.delay-4 { animation-delay: 0.32s; }
+.delay-5 { animation-delay: 0.40s; }
+.delay-6 { animation-delay: 0.48s; }
+.delay-7 { animation-delay: 0.56s; }
+
+/* ── Hash truncation ── */
+.hash-truncate {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 99px;
+}
+
+/* ── Selection ── */
+::selection {
+  background: var(--accent);
+  color: white;
+}
+
+/* ── Logo icon — invert in dark ── */
+[data-theme="dark"] .logo-icon {
+  filter: invert(1);
+}
+
+/* ── Noise texture overlay ── */
+.noise::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Glow effect ── */
+.glow-accent {
+  box-shadow: 0 0 0 1px var(--accent), 0 0 20px -4px rgba(254, 103, 0, 0.3);
+}
+
+/* ── Verify panel entrance ── */
+@keyframes verify-scan {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 200% 0%; }
+}
+.verify-panel {
+  animation: fade-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── Table row hover line ── */
+.row-hover {
+  position: relative;
+}
+.row-hover::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  background: var(--accent);
+  transition: width 0.2s ease;
+}
+.row-hover:hover::before {
+  width: 3px;
 }

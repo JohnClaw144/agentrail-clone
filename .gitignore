@@ -39,3 +39,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# secrets / scratch
+t.txt
+
+# editor & agent tooling
+.agent/
+.agents/
+.claude/
+.windsurf/
+skills-lock.json
