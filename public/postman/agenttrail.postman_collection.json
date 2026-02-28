@@ -1,0 +1,82 @@
+{
+  "info": {
+    "name": "AgentTrail API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Collection for interacting with the AgentTrail REST API"
+  },
+  "item": [
+    {
+      "name": "Execute (POST /api/execute)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"goal\": \"Extract the landing page headline\",\n  \"url\": \"https://example.com\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/execute",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "execute"]
+        }
+      }
+    },
+    {
+      "name": "List Executions (GET /api/executions)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/executions",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "executions"]
+        }
+      }
+    },
+    {
+      "name": "Retry Anchor (POST /api/executions/:id/anchor)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{apiKey}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/executions/{{executionId}}/anchor",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "executions", "{{executionId}}", "anchor"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "apiKey",
+      "value": "YOUR_API_KEY"
+    },
+    {
+      "key": "executionId",
+      "value": "00000000-0000-0000-0000-000000000000"
+    }
+  ]
+}

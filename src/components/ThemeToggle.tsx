@@ -3,36 +3,38 @@
 import { useEffect, useState } from "react";
 
 export function ThemeToggle() {
-  const [dark, setDark] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const prefersDark = () =>
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+  const [dark, setDark] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    const stored = localStorage.getItem("theme");
+    if (stored) return stored === "dark";
+    return prefersDark();
+  });
 
   useEffect(() => {
-    setMounted(true);
-    const stored = localStorage.getItem("theme");
-    if (stored === "dark") {
-      setDark(true);
-      document.documentElement.setAttribute("data-theme", "dark");
-    }
-  }, []);
-
-  function toggle() {
-    const next = !dark;
-    setDark(next);
-    if (next) {
-      document.documentElement.setAttribute("data-theme", "dark");
+    if (typeof document === "undefined") return;
+    const root = document.documentElement;
+    if (dark) {
+      root.setAttribute("data-theme", "dark");
       localStorage.setItem("theme", "dark");
     } else {
-      document.documentElement.removeAttribute("data-theme");
+      root.removeAttribute("data-theme");
       localStorage.setItem("theme", "light");
     }
-  }
+  }, [dark]);
 
-  if (!mounted) return <div className="h-8 w-8" />;
+  function toggle() {
+    setDark((prev) => !prev);
+  }
 
   return (
     <button
       onClick={toggle}
       aria-label="Toggle theme"
+      aria-pressed={dark}
       className="group relative h-8 w-8 flex items-center justify-center border border-border bg-surface hover:border-accent hover:bg-accent-glow transition-all duration-200 cursor-pointer"
     >
       {dark ? (

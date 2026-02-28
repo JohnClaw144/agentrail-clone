@@ -22,18 +22,28 @@ export async function anchorOnChain(
       args: [poaHash],
     });
 
+    await supabase
+      .from("executions")
+      .update({ tx_hash: txHash, anchor_error: null })
+      .eq("id", executionId);
+
     const client = getPublicClient();
     await client.waitForTransactionReceipt({ hash: txHash });
 
     const update: ExecutionUpdate = {
       tx_hash: txHash,
       status: "completed",
+      anchor_error: null,
     };
     await supabase.from("executions").update(update).eq("id", executionId);
   } catch (error) {
     console.error(`Blockchain anchor failed for ${executionId}:`, error);
 
-    const update: ExecutionUpdate = { status: "failed" };
+    const update: ExecutionUpdate = {
+      status: "failed",
+      anchor_error:
+        error instanceof Error ? error.message : "Unknown anchoring failure",
+    };
     await supabase.from("executions").update(update).eq("id", executionId);
   }
 }

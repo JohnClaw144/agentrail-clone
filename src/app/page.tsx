@@ -48,17 +48,33 @@ function timeAgo(dateStr: string) {
   return `${Math.floor(seconds / 86400)}d ago`;
 }
 
-export default async function Dashboard() {
+export default async function Dashboard({
+  searchParams,
+}: {
+  searchParams?: Promise<{ status?: ExecutionStatus }>;
+}) {
+  const params = (await searchParams) ?? {};
+  const validStatuses: ExecutionStatus[] = ["pending", "completed", "failed"];
+  const statusFilter = params.status && validStatuses.includes(params.status)
+    ? params.status
+    : null;
+
   let executions: Execution[] = [];
   let stats = { total: 0, completed: 0, pending: 0 };
 
   try {
     const supabase = createSupabaseServerClient();
-    const { data } = await supabase
+    let query = supabase
       .from("executions")
       .select("*")
       .order("created_at", { ascending: false })
       .limit(20);
+
+    if (statusFilter) {
+      query = query.eq("status", statusFilter);
+    }
+
+    const { data } = await query;
 
     executions = (data as Execution[]) ?? [];
     stats = {
@@ -69,6 +85,13 @@ export default async function Dashboard() {
   } catch {
     // Supabase may not be configured yet — show empty state
   }
+
+  const filterOptions: { label: string; value: ExecutionStatus | null }[] = [
+    { label: "All", value: null },
+    { label: "Pending", value: "pending" },
+    { label: "Completed", value: "completed" },
+    { label: "Failed", value: "failed" },
+  ];
 
   return (
     <FootstepsTrail>
@@ -232,6 +255,27 @@ export default async function Dashboard() {
           <span className="text-[11px] text-muted font-mono">
             {executions.length} records
           </span>
+        </div>
+
+        <div className="flex flex-wrap gap-2 mb-6">
+          {filterOptions.map((option) => {
+            const isActive = option.value === statusFilter || (!option.value && !statusFilter);
+            const href = option.value ? `/?status=${option.value}` : "/";
+            return (
+              <Link
+                key={option.label}
+                href={href}
+                className={`px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] border transition-colors ${
+                  isActive
+                    ? "bg-foreground text-background border-foreground"
+                    : "border-border text-muted hover:border-foreground/40"
+                }`}
+                aria-current={isActive ? "page" : undefined}
+              >
+                {option.label}
+              </Link>
+            );
+          })}
         </div>
 
         {executions.length === 0 ? (

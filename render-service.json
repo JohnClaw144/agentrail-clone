@@ -1,0 +1,23 @@
+{
+  "name": "agentrail-web",
+  "ownerId": "tea-cvqpgaogjchc7395vtdg",
+  "type": "web_service",
+  "repo": "https://github.com/JohnClaw144/agentrail-clone",
+  "branch": "main",
+  "rootDir": "",
+  "autoDeploy": "yes",
+  "serviceDetails": {
+    "plan": "starter",
+    "region": "oregon",
+    "env": "node",
+    "runtime": "node",
+    "envSpecificDetails": {
+      "buildCommand": "npm install && npm run build",
+      "startCommand": "npm run start"
+    },
+    "pullRequestPreviewsEnabled": "no",
+    "previews": {
+      "generation": "off"
+    }
+  }
+}

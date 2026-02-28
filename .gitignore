@@ -19,6 +19,7 @@
 
 # production
 /build
+sdk/js/dist
 
 # misc
 .DS_Store

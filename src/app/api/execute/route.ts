@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { authenticateOrg } from "@/lib/auth/apiKey";
 import { executeTinyFish } from "@/lib/tinyfish/execute";
 import { hashPayload } from "@/lib/crypto/hashPayload";
 import { anchorOnChain } from "@/lib/web3/anchor";
@@ -30,27 +31,43 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const auth = await authenticateOrg(request);
+  if (auth instanceof Response) {
+    return auth;
+  }
+
   const supabase = createSupabaseServerClient();
 
   try {
     // 2. Execute via TinyFish SSE
     const result = await executeTinyFish(goal, url);
+    const runId = result.run_id;
+    const resultJson = result.result_json ?? {};
 
     // 3. Store the result JSON as proof in Supabase Storage
-    const proofPayload = JSON.stringify(result.result_json, null, 2);
-    const proofPath = `proofs/${result.run_id}.json`;
+    const proofPayload = JSON.stringify(resultJson, null, 2);
+    const proofPath = `proofs/${runId}.json`;
 
-    await supabase.storage
+    const { error: proofUploadError } = await supabase.storage
       .from("receipts")
       .upload(proofPath, proofPayload, {
         contentType: "application/json",
-        upsert: false,
+        upsert: true,
       });
+
+    if (proofUploadError) {
+      throw new Error(`Failed to upload proof JSON: ${proofUploadError.message}`);
+    }
+
+    const {
+      data: { publicUrl: proofUrl },
+    } = supabase.storage.from("receipts").getPublicUrl(proofPath);
 
     // 4. Screenshot the target URL via thum.io
     //    TinyFish streaming URLs expire — use the target URL for a
     //    reliable visual record of the site the agent visited.
-    let screenshotUrl = result.final_url;
+    const screenshotPath = `screenshots/${runId}.png`;
+    let screenshotUrl = result.streaming_url || result.final_url;
     try {
       const screenshotTarget = result.final_url;
       const screenshotApiUrl = `https://image.thum.io/get/width/1280/png/${screenshotTarget}`;
@@ -58,23 +75,24 @@ export async function POST(request: NextRequest) {
 
       if (screenshotRes.ok) {
         const screenshotBuffer = await screenshotRes.arrayBuffer();
-        const screenshotPath = `screenshots/${result.run_id}.png`;
 
         const { error: uploadError } = await supabase.storage
           .from("receipts")
           .upload(screenshotPath, screenshotBuffer, {
             contentType: "image/png",
-            upsert: false,
+            upsert: true,
           });
 
-        if (!uploadError) {
-          const {
-            data: { publicUrl },
-          } = supabase.storage
-            .from("receipts")
-            .getPublicUrl(screenshotPath);
-          screenshotUrl = publicUrl;
+        if (uploadError) {
+          throw uploadError;
         }
+
+        const {
+          data: { publicUrl },
+        } = supabase.storage
+          .from("receipts")
+          .getPublicUrl(screenshotPath);
+        screenshotUrl = publicUrl;
       }
     } catch {
       // Screenshot capture failed — continue with streaming URL as fallback
@@ -85,19 +103,24 @@ export async function POST(request: NextRequest) {
       goal,
       url: result.final_url,
       timestamp: result.timestamp,
-      result_json: result.result_json,
+      result_json: resultJson,
     });
 
     // 6. Insert execution record with status: 'pending'
     const row: ExecutionInsert = {
+      org_id: auth.orgId,
+      run_id: runId,
       goal,
       target_url: result.final_url,
       screenshot_url: screenshotUrl,
       streaming_url: result.streaming_url || null,
+      proof_path: proofPath,
+      proof_url: proofUrl,
       poa_hash: poaHash,
       poa_timestamp: result.timestamp,
-      result_json: result.result_json,
+      result_json: resultJson,
       tx_hash: null,
+      anchor_error: null,
       status: "pending",
     };
 
@@ -124,7 +147,8 @@ export async function POST(request: NextRequest) {
       status: "pending",
       poa_hash: poaHash,
       screenshot_url: screenshotUrl,
-      result_json: result.result_json,
+      result_json: resultJson,
+      proof_url: proofUrl,
     });
   } catch (error) {
     console.error("Execution failed:", error);

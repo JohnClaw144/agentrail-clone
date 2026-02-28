@@ -4,6 +4,9 @@ import { notFound } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { VerifyButton } from "@/components/VerifyButton";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { RetryAnchorButton } from "@/components/RetryAnchorButton";
+import { revalidatePath } from "next/cache";
+import { anchorOnChain } from "@/lib/web3/anchor";
 import type { Execution, ExecutionStatus } from "@/types/database";
 
 function StatusBadge({ status }: { status: ExecutionStatus }) {
@@ -50,6 +53,15 @@ function MetaRow({
       </div>
     </div>
   );
+}
+
+async function retryAnchorAction(formData: FormData) {
+  "use server";
+  const executionId = formData.get("executionId")?.toString();
+  const poaHash = formData.get("poaHash")?.toString();
+  if (!executionId || !poaHash) return;
+  await anchorOnChain(executionId, poaHash);
+  revalidatePath(`/executions/${executionId}`);
 }
 
 function formatResultJson(
@@ -103,26 +115,7 @@ export default async function ExecutionDetail({
     notFound();
   }
 
-  // Try to fetch proof JSON from storage
-  let resultJson: Record<string, unknown> | null = null;
-  try {
-    const { data: files } = await supabase.storage
-      .from("receipts")
-      .list("proofs");
-
-    const proofFile = files?.find((f) => f.name.endsWith(".json"));
-    if (proofFile) {
-      const { data } = await supabase.storage
-        .from("receipts")
-        .download(`proofs/${proofFile.name}`);
-      if (data) {
-        const text = await data.text();
-        resultJson = JSON.parse(text);
-      }
-    }
-  } catch {
-    // Proof file may not exist
-  }
+  const resultJson = execution.result_json;
 
   const formattedDate = new Date(execution.created_at).toLocaleDateString(
     "en-US",
@@ -233,9 +226,21 @@ export default async function ExecutionDetail({
             {/* Result data */}
             {resultJson && (
               <div className="mb-10">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted mb-4">
-                  Extracted Data
-                </p>
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted">
+                    Extracted Data
+                  </p>
+                  {execution.proof_url && (
+                    <a
+                      href={execution.proof_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[10px] font-semibold uppercase tracking-[0.2em] text-accent hover:underline"
+                    >
+                      Download Raw JSON
+                    </a>
+                  )}
+                </div>
                 <div className="border border-border bg-surface p-6">
                   {formatResultJson(resultJson)}
                 </div>
@@ -252,6 +257,16 @@ export default async function ExecutionDetail({
                   {execution.poa_hash}
                 </p>
               </div>
+              {execution.anchor_error && (
+                <div className="mt-4 border border-failed/30 bg-failed/5 p-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-failed mb-1">
+                    Anchor Error
+                  </p>
+                  <p className="text-xs text-muted leading-relaxed">
+                    {execution.anchor_error}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -278,6 +293,23 @@ export default async function ExecutionDetail({
                     {execution.target_url}
                   </a>
                 </MetaRow>
+
+                {execution.proof_url ? (
+                  <MetaRow label="Proof JSON" mono>
+                    <a
+                      href={execution.proof_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-accent hover:underline break-all"
+                    >
+                      {execution.proof_path ?? execution.proof_url}
+                    </a>
+                  </MetaRow>
+                ) : (
+                  <MetaRow label="Proof JSON">
+                    <span className="text-xs text-muted">Not captured</span>
+                  </MetaRow>
+                )}
 
                 <MetaRow label="TX Hash" mono>
                   {execution.tx_hash ? (
@@ -311,6 +343,19 @@ export default async function ExecutionDetail({
 
               {/* Verify Section */}
               <VerifyButton executionId={execution.id} />
+
+              {execution.status !== "completed" && (
+                <div className="mt-6 space-y-3">
+                  <form action={retryAnchorAction} className="space-y-3">
+                    <input type="hidden" name="executionId" value={execution.id} />
+                    <input type="hidden" name="poaHash" value={execution.poa_hash} />
+                    <RetryAnchorButton />
+                  </form>
+                  <p className="text-[10px] text-muted uppercase tracking-[0.15em]">
+                    Re-queues the Base Sepolia transaction in case an earlier attempt failed.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>

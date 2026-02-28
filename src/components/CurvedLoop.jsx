@@ -20,12 +20,13 @@ const CurvedLoop = ({
   const textPathRef = useRef(null);
   const pathRef = useRef(null);
   const [spacing, setSpacing] = useState(0);
-  const [offset, setOffset] = useState(0);
+  const offsetRef = useRef(0);
   const uid = useId();
   const pathId = `curve-${uid}`;
   const pathD = customPathD || `M-100,40 Q500,${40 + curveAmount} 1540,40`;
 
   const dragRef = useRef(false);
+  const [isDragging, setIsDragging] = useState(false);
   const lastXRef = useRef(0);
   const dirRef = useRef(direction);
   const velRef = useRef(0);
@@ -47,7 +48,7 @@ const CurvedLoop = ({
     if (textPathRef.current) {
       const initial = -spacing;
       textPathRef.current.setAttribute('startOffset', initial + 'px');
-      setOffset(initial);
+      offsetRef.current = initial;
     }
   }, [spacing]);
 
@@ -65,7 +66,7 @@ const CurvedLoop = ({
         if (newOffset > 0) newOffset -= wrapPoint;
 
         textPathRef.current.setAttribute('startOffset', newOffset + 'px');
-        setOffset(newOffset);
+        offsetRef.current = newOffset;
       }
       frame = requestAnimationFrame(step);
     };
@@ -76,6 +77,7 @@ const CurvedLoop = ({
   const onPointerDown = e => {
     if (!interactive) return;
     dragRef.current = true;
+    setIsDragging(true);
     lastXRef.current = e.clientX;
     velRef.current = 0;
     e.target.setPointerCapture(e.pointerId);
@@ -95,16 +97,17 @@ const CurvedLoop = ({
     if (newOffset > 0) newOffset -= wrapPoint;
 
     textPathRef.current.setAttribute('startOffset', newOffset + 'px');
-    setOffset(newOffset);
+    offsetRef.current = newOffset;
   };
 
   const endDrag = () => {
     if (!interactive) return;
     dragRef.current = false;
+    setIsDragging(false);
     dirRef.current = velRef.current > 0 ? 'right' : 'left';
   };
 
-  const cursorStyle = interactive ? (dragRef.current ? 'grabbing' : 'grab') : 'auto';
+  const cursorStyle = interactive ? (isDragging ? 'grabbing' : 'grab') : 'auto';
 
   return (
     <div
@@ -124,7 +127,7 @@ const CurvedLoop = ({
         </defs>
         {ready && (
           <text fontWeight="bold" xmlSpace="preserve" className={className}>
-            <textPath ref={textPathRef} href={`#${pathId}`} startOffset={offset + 'px'} xmlSpace="preserve">
+            <textPath ref={textPathRef} href={`#${pathId}`} startOffset="0px" xmlSpace="preserve">
               {totalText}
             </textPath>
           </text>

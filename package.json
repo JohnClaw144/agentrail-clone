@@ -6,7 +6,9 @@
 		"dev": "next dev",
 		"build": "next build",
 		"start": "next start",
-		"lint": "eslint"
+		"lint": "eslint",
+		"create:org": "node scripts/create-org-and-key.js",
+		"build:sdk": "tsc -p sdk/js/tsconfig.json"
 	},
 	"dependencies": {
 		"@supabase/ssr": "^0.8.0",
