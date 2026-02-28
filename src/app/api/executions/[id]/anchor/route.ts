@@ -5,14 +5,14 @@ import { authenticateOrg } from "@/lib/auth/apiKey";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   const auth = await authenticateOrg(request);
   if (auth instanceof Response) {
     return auth;
   }
 
-  const { id } = params;
+  const { id } = await context.params;
   const supabase = createSupabaseServerClient();
 
   const { data, error } = await supabase
