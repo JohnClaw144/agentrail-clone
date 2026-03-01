@@ -119,9 +119,12 @@ export default async function Dashboard({
             >
               Dashboard
             </Link>
-            <span className="text-[11px] font-medium uppercase tracking-[0.15em] text-muted hover:text-foreground transition-colors cursor-default">
+            <Link
+              href="/docs"
+              className="text-[11px] font-medium uppercase tracking-[0.15em] text-muted hover:text-accent transition-colors"
+            >
               Docs
-            </span>
+            </Link>
             <div className="flex items-center gap-2 px-3 py-1.5 border border-border bg-surface">
               <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse-dot" />
               <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted">
