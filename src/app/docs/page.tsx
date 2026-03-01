@@ -18,12 +18,22 @@ const RESPONSE_SNIPPET = `{
   "result_json": { ... }
 }`;
 
+const RESPONSE_SNIPPET = `{
+  "receipt_id": "uuid",
+  "status": "pending",
+  "poa_hash": "sha256...",
+  "screenshot_url": "https://...",
+  "proof_url": "https://...",
+  "summary": "Agent captured the Coinbase hero and extracted price $63,481.08",
+  "result_json": { ... }
+}`;
+
 export default function DocsPage() {
   return (
     <FootstepsTrail>
       <div className="min-h-screen bg-background">
         <nav className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-lg">
-          <div className="max-w-6xl mx-auto flex flex-wrap items-center gap-4 justify-between px-6 py-4 md:h-16">
+          <div className="max-w-6xl mx-auto flex items-center justify-between flex-wrap gap-4 px-6 py-4 md:h-16">
             <Link href="/" className="flex items-center gap-2">
               <Image src="/footsteps.png" alt="" width={20} height={20} className="logo-icon" />
               <span className="text-xl font-bold tracking-tight">
