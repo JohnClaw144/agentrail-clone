@@ -15,6 +15,7 @@ export interface Execution {
   result_json: Record<string, unknown> | null;
   tx_hash: string | null;
   anchor_error: string | null;
+  summary: string | null;
   status: ExecutionStatus;
   created_at: string;
   updated_at: string;
@@ -26,6 +27,7 @@ export type ExecutionInsert = Omit<Execution, "id" | "created_at" | "updated_at"
   proof_path: string;
   proof_url: string;
   anchor_error: string | null;
+  summary: string | null;
 };
 
 export type ExecutionUpdate = Partial<Omit<Execution, "id" | "created_at" >>;

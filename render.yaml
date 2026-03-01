@@ -24,3 +24,5 @@ services:
         sync: false
       - key: AGENT_WALLET_ADDRESS
         sync: false
+      - key: REPLICATE_API_TOKEN
+        sync: false

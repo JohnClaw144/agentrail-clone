@@ -39,7 +39,8 @@ Open <http://localhost:3000> and POST to `/api/execute` with `{ goal, url }` and
    ```
    The script prints the plaintext key once—store it securely.
 3. Use the key in `Authorization: Bearer <key>` or `X-AgentTrail-Key: <key>` headers.
-4. Every `/api/*` request is scoped to the issuing org via Supabase + RLS.
+4. Set `REPLICATE_API_TOKEN` if you want Gemini summaries baked into each receipt.
+5. Every `/api/*` request is scoped to the issuing org via Supabase + RLS.
 
 See [`docs/API.md`](./docs/API.md) for request/response examples, visit the in-app reference at `/docs`, and grab the Postman collection from `/postman/agenttrail.postman_collection.json`.
 
@@ -68,4 +69,5 @@ curl -s -X POST \
 - Background anchoring + manual retries ✅
 - Multi-tenant API auth + key tooling ✅
 - API docs route + Postman + JS SDK ✅
+- Gemini-powered AI summaries per execution ✅
 - Upcoming: webhook callbacks, CLI tooling, Python SDK.

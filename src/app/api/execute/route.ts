@@ -4,6 +4,7 @@ import { authenticateOrg } from "@/lib/auth/apiKey";
 import { executeTinyFish } from "@/lib/tinyfish/execute";
 import { hashPayload } from "@/lib/crypto/hashPayload";
 import { anchorOnChain } from "@/lib/web3/anchor";
+import { summarizeExecution } from "@/lib/replicate/summarize";
 import type { Execution, ExecutionInsert } from "@/types/database";
 
 interface ExecuteRequestBody {
@@ -98,6 +99,14 @@ export async function POST(request: NextRequest) {
       // Screenshot capture failed — continue with streaming URL as fallback
     }
 
+    // 4b. Generate AI summary via Replicate (best-effort)
+    const summaryResult = await summarizeExecution({
+      goal,
+      screenshotUrl,
+      resultJson,
+    });
+    const summaryText = summaryResult?.text ?? null;
+
     // 5. Generate PoA hash (anchors the actual agent output, not the screenshot)
     const poaHash = hashPayload({
       goal,
@@ -121,6 +130,7 @@ export async function POST(request: NextRequest) {
       result_json: resultJson,
       tx_hash: null,
       anchor_error: null,
+      summary: summaryText,
       status: "pending",
     };
 
@@ -149,6 +159,7 @@ export async function POST(request: NextRequest) {
       screenshot_url: screenshotUrl,
       result_json: resultJson,
       proof_url: proofUrl,
+      summary: summaryText,
     });
   } catch (error) {
     console.error("Execution failed:", error);

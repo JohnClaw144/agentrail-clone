@@ -324,8 +324,15 @@ export default async function Dashboard({
                   i < executions.length - 1 ? "border-b border-border" : ""
                 }`}
               >
-                <span className="text-sm font-medium truncate group-hover:text-accent transition-colors">
-                  {execution.goal}
+                <span className="flex flex-col gap-1 min-w-0">
+                  <span className="text-sm font-medium truncate group-hover:text-accent transition-colors">
+                    {execution.goal}
+                  </span>
+                  {execution.summary && (
+                    <span className="text-[11px] text-muted truncate">
+                      {execution.summary}
+                    </span>
+                  )}
                 </span>
                 <span className="text-muted truncate font-mono text-xs self-center">
                   {new URL(execution.target_url).hostname}

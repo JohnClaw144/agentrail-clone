@@ -8,6 +8,7 @@
     {
       "name": "Execute (POST /api/execute)",
       "request": {
+        "description": "Returns receipt_id, hashes, storage URLs, and an optional Gemini summary if REPLICATE_API_TOKEN is set.",
         "method": "POST",
         "header": [
           {

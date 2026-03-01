@@ -192,6 +192,17 @@ export default async function ExecutionDetail({
         <div className="grid grid-cols-[1fr_360px] gap-12 border-t border-border pt-10 pb-20">
           {/* ─── Left Column ─── */}
           <div className="animate-fade-up delay-2">
+            {execution.summary && (
+              <div className="mb-10">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted mb-4">
+                  AI-Generated Summary
+                </p>
+                <div className="border border-border bg-surface-raised p-5 text-sm leading-relaxed text-muted">
+                  {execution.summary}
+                </div>
+              </div>
+            )}
+
             {/* Screenshot */}
             <div className="mb-10">
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted mb-4">

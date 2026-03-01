@@ -15,7 +15,7 @@
 3. The script prints a one-time API key—share it securely with the customer.
 4. Each org can have multiple keys (rerun the script with an existing org ID if needed; schema allows additional inserts).
 
-## 3. Configure Web3
+## 3. Configure Web3 & AI secrets
 1. Create a Base Sepolia RPC endpoint (Alchemy, Infura, etc.) or use the public fallback `https://base-sepolia.drpc.org`.
 2. Generate a burner wallet and fund it with Base Sepolia ETH via <https://bridge.base.org/testnet>.
 3. Deploy `src/contracts/AgentTrail.sol` using your preferred tool (Foundry, Hardhat, or `viem`).
@@ -24,6 +24,7 @@
    - `BASE_SEPOLIA_RPC_URL`
    - `AGENT_WALLET_PRIVATE_KEY`
    - `AGENT_WALLET_ADDRESS`
+   - `REPLICATE_API_TOKEN` (optional but required for AI summaries)
 
 ## 3. Render Blueprint Deployment
 1. Fork/clone `https://github.com/JohnClaw144/agentrail-clone`.

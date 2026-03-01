@@ -40,6 +40,7 @@ create table if not exists public.executions (
   result_json jsonb not null,
   tx_hash text,
   anchor_error text,
+  summary text,
   status text not null check (status in ('pending','completed','failed')),
   created_at timestamptz not null default timezone('utc', now()),
   updated_at timestamptz not null default timezone('utc', now())
