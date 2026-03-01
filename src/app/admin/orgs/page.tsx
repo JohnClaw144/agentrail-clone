@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { AppHeader } from "@/components/AppHeader";
 import { FootstepsTrail } from "@/components/FootstepsTrail";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -20,7 +21,68 @@ type OrgRecord = {
   }[];
 };
 
-export default async function AdminOrgsPage() {
+function AccessGate() {
+  return (
+    <FootstepsTrail>
+      <div className="min-h-screen bg-background flex flex-col">
+        <AppHeader active="admin" />
+        <main className="max-w-md mx-auto w-full px-4 md:px-6 py-16 space-y-6">
+          <div className="space-y-3 text-center">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-accent">Admin Portal</p>
+            <h1 className="text-2xl font-semibold tracking-tight">Enter access code</h1>
+            <p className="text-sm text-muted">
+              This dashboard is restricted. Contact Silin for the admin access code.
+            </p>
+          </div>
+          <form method="GET" className="space-y-3 border border-border bg-surface p-6 rounded-2xl shadow-sm">
+            <label className="text-sm text-muted space-y-1">
+              Access code
+              <input
+                type="password"
+                name="code"
+                className="w-full border border-border bg-background px-3 py-2 rounded focus:outline-none focus:ring-1 focus:ring-accent"
+                placeholder="••••••"
+                required
+              />
+            </label>
+            <button
+              type="submit"
+              className="inline-flex items-center justify-center gap-2 bg-foreground text-background px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] hover:bg-accent transition-all"
+            >
+              Unlock
+            </button>
+          </form>
+        </main>
+      </div>
+    </FootstepsTrail>
+  );
+}
+
+export default async function AdminOrgsPage({
+  searchParams,
+}: {
+  searchParams?: { code?: string };
+}) {
+  const requiredCode = process.env.ADMIN_ACCESS_CODE;
+  const cookieStore = cookies();
+  const incomingCode = searchParams?.code;
+  const storedCode = cookieStore.get("agentrail_admin")?.value;
+
+  if (requiredCode) {
+    if (incomingCode && incomingCode === requiredCode) {
+      cookieStore.set("agentrail_admin", incomingCode, {
+        httpOnly: true,
+        sameSite: "strict",
+        path: "/admin",
+      });
+    }
+
+    const hasAccess = storedCode === requiredCode || incomingCode === requiredCode;
+    if (!hasAccess) {
+      return <AccessGate />;
+    }
+  }
+
   const supabase = createSupabaseServerClient();
   const { data } = await supabase
     .from("orgs")
