@@ -2,6 +2,10 @@ import { createPublicClient, createWalletClient, http } from "viem";
 import { baseSepolia } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
 
+function normalizePrivateKey(key: string) {
+  return key.startsWith("0x") ? key : `0x${key}`;
+}
+
 function getConfig() {
   const rpcUrl = process.env.BASE_SEPOLIA_RPC_URL;
   const privateKey = process.env.AGENT_WALLET_PRIVATE_KEY;
@@ -13,7 +17,7 @@ function getConfig() {
     throw new Error("Missing AGENT_WALLET_PRIVATE_KEY environment variable");
   }
 
-  return { rpcUrl, privateKey };
+  return { rpcUrl, privateKey: normalizePrivateKey(privateKey) };
 }
 
 export function getAccount() {

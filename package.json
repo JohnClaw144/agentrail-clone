@@ -28,6 +28,7 @@
 		"eslint": "^9",
 		"eslint-config-next": "16.1.6",
 		"jsrepo": "^3.6.0",
+		"pg": "^8.19.0",
 		"tailwindcss": "^4",
 		"typescript": "^5.9.3"
 	}
