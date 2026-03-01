@@ -1,7 +1,5 @@
-import Link from "next/link";
-import Image from "next/image";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { FootstepsTrail } from "@/components/FootstepsTrail";
+import { AppHeader } from "@/components/AppHeader";
 
 const REQUEST_SNIPPET = `{
   "goal": "Extract the hero headline",
@@ -22,31 +20,7 @@ export default function DocsPage() {
   return (
     <FootstepsTrail>
       <div className="min-h-screen bg-background">
-        <nav className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-lg">
-          <div className="max-w-6xl mx-auto flex items-center justify-between flex-wrap gap-4 px-4 md:px-8 py-4 md:h-16">
-            <Link href="/" className="flex items-center gap-2">
-              <Image src="/footsteps.png" alt="" width={20} height={20} className="logo-icon" />
-              <span className="text-xl font-bold tracking-tight">
-                Agen<span className="text-accent">Trail</span>
-              </span>
-            </Link>
-            <div className="flex flex-wrap items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.15em] text-muted">
-              <Link href="/" className="hover:text-accent transition-colors">
-                Dashboard
-              </Link>
-              <Link href="/docs" className="text-foreground">
-                Docs
-              </Link>
-              <div className="flex items-center gap-2 px-3 py-1.5 border border-border bg-surface">
-                <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse-dot" />
-                <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted">
-                  Base Sepolia
-                </span>
-              </div>
-              <ThemeToggle />
-            </div>
-          </div>
-        </nav>
+        <AppHeader active="docs" />
 
         <header className="border-b border-border py-14 md:py-16 relative overflow-hidden">
           <div className="absolute inset-0 opacity-40 pointer-events-none" aria-hidden>

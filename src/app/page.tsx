@@ -1,8 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { FootstepsTrail } from "@/components/FootstepsTrail";
+import { AppHeader } from "@/components/AppHeader";
 import type { Execution, ExecutionStatus } from "@/types/database";
 
 function StatusBadge({ status }: { status: ExecutionStatus }) {
@@ -96,45 +96,7 @@ export default async function Dashboard({
   return (
     <FootstepsTrail>
     <div className="min-h-screen bg-background">
-      {/* ── Navbar ── */}
-      <nav className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-lg">
-        <div className="max-w-6xl mx-auto flex items-center justify-between px-8 h-16">
-          <Link href="/" className="flex items-center gap-2">
-            <Image
-              src="/footsteps.png"
-              alt=""
-              width={22}
-              height={22}
-              className="logo-icon"
-            />
-            <span className="text-xl font-bold tracking-tight">
-              Agen<span className="text-accent">Trail</span>
-            </span>
-          </Link>
-
-          <div className="flex items-center gap-8">
-            <Link
-              href="/"
-              className="text-[11px] font-semibold uppercase tracking-[0.15em] text-foreground hover:text-accent transition-colors"
-            >
-              Dashboard
-            </Link>
-            <Link
-              href="/docs"
-              className="text-[11px] font-medium uppercase tracking-[0.15em] text-muted hover:text-accent transition-colors"
-            >
-              Docs
-            </Link>
-            <div className="flex items-center gap-2 px-3 py-1.5 border border-border bg-surface">
-              <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse-dot" />
-              <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted">
-                Base Sepolia
-              </span>
-            </div>
-            <ThemeToggle />
-          </div>
-        </div>
-      </nav>
+      <AppHeader active="dashboard" />
 
       {/* ── Hero ── */}
       <section className="relative max-w-6xl mx-auto px-8 pt-28 pb-24">
