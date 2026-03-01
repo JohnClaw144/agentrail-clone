@@ -3,15 +3,18 @@ import Image from "next/image";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface AppHeaderProps {
-  active?: "dashboard" | "docs" | "playground";
+  active?: "dashboard" | "docs" | "playground" | "admin";
   chainLabel?: string;
 }
 
+type NavKey = "dashboard" | "docs" | "playground" | "admin";
+
 export function AppHeader({ active = "dashboard", chainLabel = "Base Sepolia" }: AppHeaderProps) {
-  const items: { href: string; label: string; key: "dashboard" | "docs" | "playground" }[] = [
+  const items: { href: string; label: string; key: NavKey }[] = [
     { href: "/", label: "Dashboard", key: "dashboard" },
     { href: "/docs", label: "Docs", key: "docs" },
     { href: "/playground", label: "Playground", key: "playground" },
+    { href: "/admin/orgs", label: "Access", key: "admin" },
   ];
 
   return (
