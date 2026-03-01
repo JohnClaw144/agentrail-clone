@@ -18,16 +18,6 @@ const RESPONSE_SNIPPET = `{
   "result_json": { ... }
 }`;
 
-const RESPONSE_SNIPPET = `{
-  "receipt_id": "uuid",
-  "status": "pending",
-  "poa_hash": "sha256...",
-  "screenshot_url": "https://...",
-  "proof_url": "https://...",
-  "summary": "Agent captured the Coinbase hero and extracted price $63,481.08",
-  "result_json": { ... }
-}`;
-
 export default function DocsPage() {
   return (
     <FootstepsTrail>
