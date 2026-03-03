@@ -108,3 +108,34 @@ export async function issueKeyAction(_prev: ActionState, formData: FormData): Pr
     return { error: error instanceof Error ? error.message : "Unexpected error" };
   }
 }
+
+export async function toggleKeyStatusAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const keyId = formData.get("keyId")?.toString();
+  const nextState = formData.get("nextState")?.toString();
+  const keyName = formData.get("keyName")?.toString() ?? "API key";
+
+  if (!keyId || !nextState) {
+    return { error: "Missing key parameters" };
+  }
+
+  const revoked = nextState === "revoked";
+  const supabase = createSupabaseServerClient();
+
+  try {
+    const { error } = await supabase
+      .from("org_api_keys")
+      .update({ revoked })
+      .eq("id", keyId);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    revalidatePath("/admin/orgs");
+    return {
+      success: revoked ? `Revoked ${keyName}` : `Reactivated ${keyName}`,
+    };
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Unexpected error" };
+  }
+}

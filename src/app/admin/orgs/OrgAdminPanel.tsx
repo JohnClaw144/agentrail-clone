@@ -2,7 +2,7 @@
 
 import { useFormState } from "react-dom";
 import { useEffect } from "react";
-import { createOrgAction, issueKeyAction, type ActionState } from "./actions";
+import { createOrgAction, issueKeyAction, toggleKeyStatusAction, type ActionState } from "./actions";
 
 const initialState: ActionState = {};
 
@@ -31,9 +31,21 @@ function formatDate(value: string) {
   });
 }
 
+function KeyStatusPill({ revoked }: { revoked: boolean }) {
+  const base = "text-[10px] uppercase tracking-[0.2em] px-2 py-1 rounded border";
+  return (
+    <span
+      className={`${base} ${revoked ? "border-failed/40 text-failed" : "border-success/40 text-success"}`}
+    >
+      {revoked ? "revoked" : "active"}
+    </span>
+  );
+}
+
 export function OrgAdminPanel({ orgs }: { orgs: Org[] }) {
   const [createState, createAction] = useFormState(createOrgAction, initialState);
   const [issueState, issueAction] = useFormState(issueKeyAction, initialState);
+  const [statusState, toggleStatusAction] = useFormState(toggleKeyStatusAction, initialState);
 
   useEffect(() => {
     if (createState.success || createState.error) {
@@ -54,6 +66,16 @@ export function OrgAdminPanel({ orgs }: { orgs: Org[] }) {
       return () => clearTimeout(timer);
     }
   }, [issueState]);
+
+  useEffect(() => {
+    if (statusState.success || statusState.error) {
+      const timer = setTimeout(() => {
+        const el = document.getElementById("status-feedback");
+        el?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [statusState]);
 
   return (
     <div className="space-y-10">
@@ -193,23 +215,57 @@ export function OrgAdminPanel({ orgs }: { orgs: Org[] }) {
                             <th className="py-2">Last four</th>
                             <th className="py-2">Status</th>
                             <th className="py-2">Created</th>
+                            <th className="py-2 text-right">Actions</th>
                           </tr>
                         </thead>
                         <tbody>
                           {org.org_api_keys.map((key) => (
-                            <tr key={key.id} className="border-t border-border text-xs">
+                            <tr key={key.id} className="border-t border-border text-xs align-middle">
                               <td className="py-2 font-medium text-foreground">{key.name}</td>
                               <td className="py-2 font-mono">{key.last_four ?? "----"}</td>
-                              <td className="py-2 text-[10px] uppercase tracking-[0.2em]">
-                                {key.revoked ? "revoked" : "active"}
+                              <td className="py-2">
+                                <KeyStatusPill revoked={key.revoked} />
                               </td>
                               <td className="py-2 text-muted">{formatDate(key.created_at)}</td>
+                              <td className="py-2 text-right">
+                                <form action={toggleStatusAction} className="inline-flex gap-2">
+                                  <input type="hidden" name="keyId" value={key.id} />
+                                  <input type="hidden" name="keyName" value={`${org.name} – ${key.name}`} />
+                                  <input
+                                    type="hidden"
+                                    name="nextState"
+                                    value={key.revoked ? "active" : "revoked"}
+                                  />
+                                  <button
+                                    type="submit"
+                                    className={`inline-flex items-center gap-1 px-3 py-1 border text-[10px] uppercase tracking-[0.2em] transition-colors ${
+                                      key.revoked
+                                        ? "border-success/40 text-success hover:bg-success/10"
+                                        : "border-failed/40 text-failed hover:bg-failed/10"
+                                    }`}
+                                  >
+                                    {key.revoked ? "Restore" : "Revoke"}
+                                  </button>
+                                </form>
+                              </td>
                             </tr>
                           ))}
                         </tbody>
                       </table>
                     </div>
                   )}
+                  <div id="status-feedback" className="space-y-2">
+                    {statusState.error && (
+                      <p className="text-sm text-failed bg-failed/10 border border-failed/30 px-3 py-2 rounded">
+                        {statusState.error}
+                      </p>
+                    )}
+                    {statusState.success && (
+                      <p className="text-sm text-success bg-success/10 border border-success/30 px-3 py-2 rounded">
+                        {statusState.success}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
